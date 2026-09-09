@@ -26,6 +26,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
+// Variante
+import androidx.compose.foundation.layout.Row
+import androidx.compose.ui.Alignment
+
 /**
  * Mini-TP 4 — « Faire vivre un écran »
  *
@@ -62,7 +66,7 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun ProduitCard(produit: Produit) {
+fun OldProduitCard(produit: Produit) {
     // Ce log trace chaque (re)composition de la carte — NE PAS le déplacer.
     Log.i("RECOMP", "ProduitCard se (re)compose")
 
@@ -78,12 +82,18 @@ fun ProduitCard(produit: Produit) {
     //          else MaterialTheme.colorScheme.surfaceVariant
     //      )
 
+    var selectionnee by remember { mutableStateOf(false) }
+    var quantite by remember { mutableStateOf(0) }
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(16.dp),
+            .padding(16.dp)
+            .clickable { selectionnee = !selectionnee },
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant
+            containerColor = if (selectionnee)
+                MaterialTheme.colorScheme.primaryContainer
+            else MaterialTheme.colorScheme.surfaceVariant
         ),
     ) {
         Column(Modifier.padding(16.dp)) {
@@ -105,8 +115,57 @@ fun ProduitCard(produit: Produit) {
             // 2. Remplacez les deux lignes ci-dessous par :
             //      Text("Quantité : $quantite kg")
             //      Button(onClick = { quantite++ }) { Text("Ajouter 1 kg") }
-            Text("Quantité : (TODO A)")
-            Button(onClick = { /* TODO A */ }) { Text("Ajouter 1 kg") }
+
+            Text("Quantité : $quantite kg")
+            Button(onClick = { quantite++ }) { Text("Ajouter 1 kg") }
+        }
+    }
+}
+
+@Composable
+fun ProduitCard(produit: Produit) {
+    Log.i("RECOMP", "ProduitCard se (re)compose")
+
+    var selectionnee by remember { mutableStateOf(false) }
+    var quantite by remember { mutableStateOf(0) }
+
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp)
+            .clickable { selectionnee = !selectionnee },
+        colors = CardDefaults.cardColors(
+            containerColor = if (selectionnee)
+                MaterialTheme.colorScheme.primaryContainer
+            else MaterialTheme.colorScheme.surfaceVariant
+        ),
+    ) {
+        Row(
+            modifier = Modifier
+                .padding(16.dp)
+                .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically // Aligne verticalement le contenu
+        ) {
+            // Partie gauche : Détails du produit (prend tout l'espace disponible)
+            Column(modifier = Modifier.weight(1f)) {
+                Text(produit.nom, style = MaterialTheme.typography.titleLarge)
+                Text(
+                    "Origine : ${produit.origine}",
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+                Text(
+                    produit.prixKg?.let { "${formatAriary(it)} / kg" } ?: "prix non fixé",
+                    style = MaterialTheme.typography.bodyLarge,
+                )
+            }
+
+            // Partie droite : Compteur et Bouton
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Text("Qté : $quantite kg")
+                Button(onClick = { quantite++ }) {
+                    Text("Ajouter")
+                }
+            }
         }
     }
 }
